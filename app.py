@@ -1,10 +1,31 @@
 import streamlit as st
-import pandas as pd
 import os
 from datetime import datetime
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 
+# 1. Configuración de la página
 st.set_page_config(page_title="Validación Política IAG V11", layout="centered", page_icon="🧭")
 
+# 2. Inicialización de Firebase
+if not firebase_admin._apps:
+    try:
+        # Extraer credenciales desde los secrets de Streamlit Cloud
+        cred_dict = dict(st.secrets["firebase"])
+        cred = credentials.Certificate(cred_dict)
+        firebase_admin.initialize_app(cred)
+    except Exception as e:
+        st.error(f"Error de inicialización de Firebase. Revise los Secrets. Detalle: {e}")
+
+# Conectar cliente de base de datos
+try:
+    db = firestore.client()
+except Exception as e:
+    db = None
+    st.error("No se pudo iniciar el cliente de Firestore.")
+
+# 3. Encabezado y Descarga de Documento
 st.title("Validación y Apropiación: Política de uso de IAG")
 st.subheader("Versión 11-2026 | Facultad de Ciencias de la Educación")
 st.write("""
@@ -15,7 +36,6 @@ Su participación es clave para consolidar un marco que fomente la equidad, la t
 st.markdown("### 📄 Documento de Estudio")
 st.write("Descargue y lea la política completa antes de iniciar la validación:")
 
-# Botón de descarga del PDF
 if os.path.exists("PoliticaV11.pdf"):
     with open("PoliticaV11.pdf", "rb") as pdf_file:
         st.download_button(
@@ -25,12 +45,12 @@ if os.path.exists("PoliticaV11.pdf"):
             mime="application/pdf"
         )
 else:
-    st.warning("⚠️ El archivo PoliticaV11.pdf no se encuentra en el repositorio. Por favor, súbalo a GitHub.")
+    st.warning("⚠️ El archivo PoliticaV11.pdf no se encuentra en el repositorio.")
 
 st.markdown("---")
 
+# 4. Formulario de Validación
 with st.form("validacion_v11"):
-    
     st.markdown("### 1. Identificación y Contexto")
     nombre = st.text_input("Nombres y apellidos completos")
     correo = st.text_input("Correo institucional")
@@ -66,6 +86,7 @@ with st.form("validacion_v11"):
     
     enviado = st.form_submit_button("Enviar validación")
 
+# 5. Lógica de guardado en la nube
 if enviado:
     if nombre and correo:
         nueva_respuesta = {
@@ -85,14 +106,15 @@ if enviado:
             "Comentarios_Finales": comentarios_finales
         }
         
-        df_nuevo = pd.DataFrame([nueva_respuesta])
-        archivo_csv = 'respuestas_validacion.csv'
-        
-        if not os.path.isfile(archivo_csv):
-            df_nuevo.to_csv(archivo_csv, index=False)
+        if db is not None:
+            try:
+                # Esto crea la colección automáticamente en Firestore y añade el documento
+                db.collection("validacion_v11").add(nueva_respuesta)
+                st.success("¡Gracias! Sus aportes a la Versión 11 han sido guardados de forma segura en la base de datos institucional.")
+            except Exception as e:
+                st.error(f"Ocurrió un error al guardar los datos en la nube: {e}")
         else:
-            df_nuevo.to_csv(archivo_csv, mode='a', header=False, index=False)
+            st.error("No hay conexión activa a la base de datos para guardar la respuesta.")
             
-        st.success("¡Gracias! Sus aportes a la Versión 11 de la política han sido registrados exitosamente.")
     else:
         st.error("Por favor, complete al menos su nombre y correo institucional.")
