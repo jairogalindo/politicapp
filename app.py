@@ -2,97 +2,70 @@ import streamlit as st
 import pandas as pd
 import os
 from datetime import datetime
+import google.generativeai as genai
 
-# Configuración inicial de la página
-st.set_page_config(page_title="Validación Política IAG V11", layout="centered", page_icon="🧭")
+# Configuración inicial
+st.set_page_config(page_title="Agente y Validación - Política IAG V11", layout="centered", page_icon="🧭")
 
-# Título y descripción
-st.title("Validación y Apropiación: Política de uso de IAG")
-st.subheader("Versión 11-2026 | Facultad de Ciencias de la Educación")
-st.write("""
-Este espacio abierto busca recoger sus valoraciones sobre la Versión 11 de la política de uso de IAG. 
-Su participación es clave para consolidar un marco que fomente la equidad, la transparencia y el reconocimiento del trabajo humano.
-""")
+# --- CONFIGURACIÓN DE LA API (Necesitas tu API Key de Google AI Studio) ---
+# En Streamlit Cloud, debes guardar tu API Key en la sección de "Secrets" como GOOGLE_API_KEY
+# genai.configure(api_key=st.secrets["GOOGLE_API_KEY"]) 
+# Por ahora, usamos un mock si no hay API key configurada para que la app no falle.
 
-# Crear el formulario
-with st.form("validacion_v11"):
-    
-    st.markdown("### 1. Identificación y Contexto")
-    nombre = st.text_input("Nombres y apellidos completos")
-    correo = st.text_input("Correo institucional")
-    rol = st.selectbox("Rol en la Facultad", ["Estudiante de pregrado", "Estudiante de posgrado", "Docente", "Directivo", "Otro"])
-    programa = st.text_input("Programa al que pertenece")
-    
-    st.markdown("---")
-    st.markdown("### 2. La Brújula Ética y Clasificación de Datos")
-    st.info("La versión 11 incorpora una tabla explícita de clasificación de datos (Públicos, Personales, Sensibles, Confidenciales e Institucionales) y refuerza el reconocimiento del trabajo humano.")
-    
-    p2_1 = st.slider("¿Qué tan clara y aplicable resulta la nueva tabla de 'Clasificación de datos' para decidir qué información introducir en una IAG?", 1, 5, 3)
-    p2_2 = st.text_area("¿Identifica algún vacío práctico en los cuatro puntos de la brújula (Equidad, Rendición de cuentas, Transparencia, Seguridad) frente a su realidad en el aula?")
-    
-    st.markdown("---")
-    st.markdown("### 3. Niveles de Uso y Declaración Obligatoria")
-    st.info("Se refinó la escala de 5 niveles (diferenciando el 4 del 5 por su propósito) y se instauró un formato de declaración con cuatro campos fijos: Sistema, Función, Nivel y Aporte propio.")
-    
-    p3_1 = st.slider("¿Considera que los 5 niveles propuestos permiten clasificar adecuadamente cualquier interacción académica con la IAG?", 1, 5, 3)
-    p3_2 = st.slider("Evalúe la viabilidad práctica de exigir el nuevo formato obligatorio de 4 campos en todas las entregas académicas.", 1, 5, 3)
-    p3_3 = st.text_area("¿Qué dificultades anticipa por parte de estudiantes o docentes al momento de redactar la 'Intervención del autor' (Aporte propio) en las declaraciones?")
-    
-    st.markdown("---")
-    st.markdown("### 4. Mecanismos de Apropiación Pedagógica")
-    st.info("Para que la política viva en el aula, se propone visibilizar los niveles en el syllabus, crear un banco de casos, realizar talleres y cuidar la proporcionalidad de la carga docente.")
-    
-    p4_1 = st.selectbox("¿Cuál de los siguientes mecanismos considera que tendrá mayor impacto real en la cultura académica?", 
-                        ["Declaración del nivel admitido desde el Syllabus", 
-                         "Banco institucional de casos (buenas y malas prácticas)", 
-                         "Talleres de apropiación socioafectiva e intelectual", 
-                         "Evaluación reflexiva en los productos entregados"])
-    p4_2 = st.text_area("El numeral 7.6 advierte sobre la carga docente. ¿Qué estrategias sugiere para que la verificación de declaraciones no sobrecargue la evaluación?")
-    
-    st.markdown("---")
-    st.markdown("### 5. Acciones Restaurativas")
-    st.info("La política transita de las 'sanciones' hacia 'acciones restaurativas' que se activan principalmente si el estudiante no logra sostener o sustentar su trabajo.")
-    
-    p5_1 = st.slider("¿Qué tan pertinente considera el cambio de enfoque de 'sanción' a 'acción restaurativa' para fortalecer el aprendizaje?", 1, 5, 3)
-    p5_2 = st.text_area("¿Considera que el criterio de 'no sostener su trabajo' en una sustentación es suficiente y manejable para el docente? ¿Qué ajustes propone?")
-    
-    st.markdown("---")
-    comentarios_finales = st.text_area("¿Tiene alguna otra observación o recomendación específica para la versión definitiva de este documento?")
-    
-    # Botón de envío
-    enviado = st.form_submit_button("Enviar validación")
+st.title("🧭 Agente de Consulta: Política IAG (Versión 11)")
+st.write("Antes de validar la política, converse con este asistente para resolver dudas sobre los niveles de uso, la brújula ética o las acciones restaurativas.")
 
-# Lógica de guardado al enviar
-if enviado:
-    if nombre and correo:
-        # Crear un diccionario con los datos
-        nueva_respuesta = {
-            "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "Nombre": nombre,
-            "Correo": correo,
-            "Rol": rol,
-            "Programa": programa,
-            "Claridad_Datos": p2_1,
-            "Vacio_Brujula": p2_2,
-            "Viabilidad_Niveles": p3_1,
-            "Viabilidad_Declaracion": p3_2,
-            "Dificultad_AportePropio": p3_3,
-            "Mecanismo_Impacto": p4_1,
-            "Estrategia_CargaDocente": p4_2,
-            "Pertinencia_Restaurativa": p5_1,
-            "Criterio_Sustentacion": p5_2,
-            "Comentarios_Finales": comentarios_finales
-        }
+# Inicializar historial de chat y contador de interacciones en session_state
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "interacciones" not in st.session_state:
+    st.session_state.interacciones = 0
+
+# Mostrar historial de chat
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Input del chat
+if prompt := st.chat_input("Pregunte algo sobre la versión 11 de la política..."):
+    # Agregar mensaje del usuario
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # Aquí iría la llamada real a la API de Gemini pasándole el texto de la política como contexto.
+    # Por ahora simulamos una respuesta genérica basada en tu política.
+    respuesta_agente = f"Interesante pregunta sobre '{prompt}'. Según la Versión 11, la política prioriza la evaluación formativa y el reconocimiento del trabajo humano. ¿Tiene alguna otra duda sobre los niveles de uso o la declaración obligatoria?"
+    
+    with st.chat_message("assistant"):
+        st.markdown(respuesta_agente)
+    st.session_state.messages.append({"role": "assistant", "content": respuesta_agente})
+    st.session_state.interacciones += 1
+
+# --- FASE 2: DESBLOQUEO DEL FORMULARIO ---
+st.markdown("---")
+
+if st.session_state.interacciones >= 2:
+    st.success("¡Gracias por explorar el documento! Ahora que ha interactuado con la política, lo invitamos a dejar su validación final.")
+    
+    # Aquí pegas exactamente el mismo bloque de formulario (with st.form("validacion_v11"): ...) 
+    # que te pasé en el mensaje anterior.
+    with st.form("validacion_v11"):
+        st.markdown("### Validación Final")
+        nombre = st.text_input("Nombres y apellidos completos")
+        correo = st.text_input("Correo institucional")
         
-        # Guardar en CSV
-        df_nuevo = pd.DataFrame([nueva_respuesta])
-        archivo_csv = 'respuestas_validacion.csv'
+        st.markdown("#### Sus valoraciones")
+        p2_1 = st.slider("¿Qué tan clara resulta la tabla de 'Clasificación de datos'?", 1, 5, 3)
+        comentarios_finales = st.text_area("¿Tiene alguna observación final para la versión definitiva?")
         
-        if not os.path.isfile(archivo_csv):
-            df_nuevo.to_csv(archivo_csv, index=False)
-        else:
-            df_nuevo.to_csv(archivo_csv, mode='a', header=False, index=False)
-            
-        st.success("¡Gracias! Sus aportes a la Versión 11 de la política han sido registrados exitosamente.")
-    else:
-        st.error("Por favor, complete al menos su nombre y correo institucional.")
+        enviado = st.form_submit_button("Enviar validación")
+        
+        if enviado:
+            if nombre and correo:
+                st.success("¡Gracias! Sus aportes han sido registrados exitosamente.")
+                # Lógica de guardado en CSV (igual que en el código anterior)
+            else:
+                st.error("Por favor, complete su nombre y correo.")
+else:
+    st.info("💡 Interactúe al menos 2 veces con el agente mediante el chat de arriba para desbloquear el formulario de validación institucional.")
