@@ -35,10 +35,6 @@ except Exception as e:
 st.title("🧭 Agente de Consulta: Política IAG (Versión 11)")
 st.write("Antes de proceder a la validación, converse con este asistente para resolver cualquier duda sobre las directrices, los niveles de uso o la declaración de autoría.")
 
-# --- INTERFAZ ---
-st.title("🧭 Agente de Consulta: Política IAG (Versión 11)")
-st.write("Antes de proceder a la validación, converse con este asistente para resolver cualquier duda sobre las directrices, los niveles de uso o la declaración de autoría.")
-
 # --- NUEVO: BOTÓN DE DESCARGA DEL PDF ---
 st.markdown("### 📄 Documento de Estudio")
 st.write("Descargue y lea la política completa antes de iniciar la validación:")
