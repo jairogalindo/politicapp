@@ -35,6 +35,32 @@ except Exception as e:
 st.title("🧭 Agente de Consulta: Política IAG (Versión 11)")
 st.write("Antes de proceder a la validación, converse con este asistente para resolver cualquier duda sobre las directrices, los niveles de uso o la declaración de autoría.")
 
+# --- INTERFAZ ---
+st.title("🧭 Agente de Consulta: Política IAG (Versión 11)")
+st.write("Antes de proceder a la validación, converse con este asistente para resolver cualquier duda sobre las directrices, los niveles de uso o la declaración de autoría.")
+
+# --- NUEVO: BOTÓN DE DESCARGA DEL PDF ---
+st.markdown("### 📄 Documento de Estudio")
+st.write("Descargue y lea la política completa antes de iniciar la validación:")
+
+# Verificamos que el archivo exista para que la app no falle si olvidas subirlo
+if os.path.exists("PoliticaV11.pdf"):
+    with open("PoliticaV11.pdf", "rb") as pdf_file:
+        PDFbyte = pdf_file.read()
+    
+    st.download_button(
+        label="📥 Descargar Documento: Política IAG V11",
+        data=PDFbyte,
+        file_name="PoliticaV11.pdf",
+        mime="application/pdf"
+    )
+else:
+    st.warning("⚠️ El archivo PoliticaV11.pdf no se encuentra en el repositorio.")
+
+st.markdown("---") # Una línea divisoria visual
+
+# ... (Aquí continúa tu código del historial de chat) ...
+
 # Inicializar variables de sesión
 if "chat_session" not in st.session_state:
     try:
