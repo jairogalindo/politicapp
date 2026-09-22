@@ -10,7 +10,7 @@ st.set_page_config(page_title="Agente y Validación - Política IAG V11", layout
 # --- CONFIGURACIÓN DE LA API DE GEMINI ---
 # Extrae la llave de seguridad desde los Secrets de Streamlit
 try:
-    genai.configure(api_key=st.secrets["AQ.Ab8RN6L74P5ivQ1sTgohpEccwDa1rxwaven89vmBgwYP4Qdfvg"])
+    genai.configure(api_key="AQ.Ab8RN6L74P5ivQ1sTgohpEccwDa1rxwaven89vmBgwYP4Qdfvg")
     
     # Instrucción central para acotar al agente al documento
     instruccion_sistema = """
