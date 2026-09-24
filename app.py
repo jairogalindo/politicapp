@@ -36,16 +36,29 @@ Su participación es clave para consolidar un marco que fomente la equidad, la t
 st.markdown("### 📄 Documento de Estudio")
 st.write("Descargue y lea la política completa antes de iniciar la validación:")
 
-if os.path.exists("PoliticaV11.pdf"):
-    with open("PoliticaV11.pdf", "rb") as pdf_file:
-        st.download_button(
-            label="📥 Descargar Documento: Política IAG V11",
-            data=pdf_file.read(),
-            file_name="PoliticaV11.pdf",
-            mime="application/pdf"
-        )
-else:
-    st.warning("⚠️ El archivo PoliticaV11.pdf no se encuentra en el repositorio.")
+columna_descarga, columna_agente = st.columns(2)
+
+with columna_descarga:
+    if os.path.exists("PoliticaV11.pdf"):
+        with open("PoliticaV11.pdf", "rb") as pdf_file:
+            st.download_button(
+                label="📥 Descargar política IAG V11",
+                data=pdf_file.read(),
+                file_name="PoliticaV11.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+    else:
+        st.warning("⚠️ El archivo PoliticaV11.pdf no se encuentra en el repositorio.")
+
+with columna_agente:
+    st.link_button(
+        label="💬 Dialogar con el agente",
+        url="https://m365.cloud.microsoft/chat/?titleId=T_e3603ae8-cb2d-f12d-479b-c291df44d19e&source=embedded-builder",
+        help="Abre Orientador Política IAG. Requiere autenticación con una cuenta de la Universidad De La Salle (unisalle).",
+        use_container_width=True
+    )
+    st.caption("Agente: Orientador Política IAG. Acceso exclusivo para usuarios autenticados de Unisalle.")
 
 st.markdown("---")
 
