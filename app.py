@@ -6,7 +6,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 
 # 1. Configuración de la página
-st.set_page_config(page_title="Validación Política IAG V11", layout="centered", page_icon="🧭")
+st.set_page_config(page_title="Validación Marco de Apropiación Pedagógica", layout="centered", page_icon="🧭")
 
 # 2. Inicialización de Firebase
 if not firebase_admin._apps:
@@ -15,8 +15,8 @@ if not firebase_admin._apps:
         cred_dict = dict(st.secrets["firebase"])
         cred = credentials.Certificate(cred_dict)
         firebase_admin.initialize_app(cred)
-    except Exception as e:
-        st.error(f"Error de inicialización de Firebase. Revise los Secrets. Detalle: {e}")
+    except Exception:
+        st.error("No se pudo iniciar Firebase. Revise la configuración de secretos de la aplicación.")
 
 # Conectar cliente de base de datos
 try:
@@ -26,7 +26,7 @@ except Exception as e:
     st.error("No se pudo iniciar el cliente de Firestore.")
 
 # 3. Encabezado y Descarga de Documento
-st.title("Validación y Apropiación: Política de uso de IAG")
+st.title("Validación Marco de Apropiación Pedagógica")
 st.subheader("Versión 11-2026 | Facultad de Ciencias de la Educación")
 st.write("""
 Este espacio abierto busca recoger sus valoraciones sobre la Versión 11 de la política de uso de IAG. 
