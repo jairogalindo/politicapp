@@ -29,12 +29,12 @@ except Exception as e:
 st.title("Validación Marco de Apropiación Pedagógica")
 st.subheader("Versión 11-2026 | Facultad de Ciencias de la Educación")
 st.write("""
-Este espacio abierto busca recoger sus valoraciones sobre la Versión 11 de la política de uso de IAG. 
+Este espacio abierto busca recoger sus valoraciones sobre la Versión 11 del Marco de Apropiación Pedagógica de IAG. 
 Su participación es clave para consolidar un marco que fomente la equidad, la transparencia y el reconocimiento del trabajo humano.
 """)
 
 st.markdown("### 📄 Documento de Estudio")
-st.write("Descargue y lea la política completa antes de iniciar la validación:")
+st.write("Consulte el Marco completo antes de iniciar la validación:")
 
 columna_descarga, columna_agente = st.columns(2)
 
@@ -42,7 +42,7 @@ with columna_descarga:
     if os.path.exists("PoliticaV11.pdf"):
         with open("PoliticaV11.pdf", "rb") as pdf_file:
             st.download_button(
-                label="📥 Descargar política IAG V11",
+                label="📥 Ver Marco",
                 data=pdf_file.read(),
                 file_name="PoliticaV11.pdf",
                 mime="application/pdf",
